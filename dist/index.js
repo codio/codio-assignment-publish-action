@@ -2518,10 +2518,13 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
             yield sleep(10);
             const status = yield getJson(taskUrl, undefined, authHeaders);
             if (status['done']) {
+                if (status['error']) {
+                    throw new Error(status['error']);
+                }
                 break;
             }
-            console.log(status);
         }
+        console.log('publish Completed');
     }
     catch (error) {
         core.setFailed(error.message);
