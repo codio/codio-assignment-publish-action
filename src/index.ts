@@ -52,6 +52,9 @@ const main = async () => {
     console.log('publish Completed')
 
   } catch (error) {
+    if (error.json) {
+      console.log(await error.json())
+    }
     core.setFailed(error.message)
   }
 }
