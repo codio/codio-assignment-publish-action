@@ -1,0 +1,29 @@
+# action.yml
+name: 'Codio assessment publish'
+description: 'Publishes a new version of assessment'
+inputs:
+  token:
+    description: 'API access token'
+    required: true
+    default: ''
+  course-id:
+    description: 'Course Id'
+    required: true
+    default: ''
+  assignment-id:
+    description: 'Assignement Id'
+    required: true
+    default: ''
+  zip:
+    description: 'Path to the zipped module'
+    required: true
+    default: ''
+  changelog:
+    description: 'no message'
+  domain:
+    description: 'API Domain'
+    required: false
+    default: 'codio.com'
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
