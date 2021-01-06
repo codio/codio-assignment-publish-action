@@ -14,7 +14,7 @@ steps:
   with:
     token: api-token
     course-id: my-course-id
-    assignment: my-assignment-id
+    assignment-id: my-assignment-id
     changelog: message
     zip: new_version.zip
 ```

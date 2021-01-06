@@ -42,10 +42,14 @@ const main = async () => {
       await sleep(10)
       const status = await getJson(taskUrl, undefined, authHeaders)
       if (status['done']) {
+        if (status['error']) {
+          throw new Error(status['error'])
+        }
         break
       }
-      console.log(status)
+
     }
+    console.log('publish Completed')
 
   } catch (error) {
     core.setFailed(error.message)
