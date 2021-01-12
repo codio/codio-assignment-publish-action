@@ -15,7 +15,7 @@ inputs:
     required: true
     default: ''
   zip:
-    description: 'Path to the zipped module'
+    description: 'Path to the zipped module or tar.gz archive'
     required: true
     default: ''
   changelog:
