@@ -10,7 +10,8 @@ const main = async () => {
     const secretId = core.getInput('secret-id', { required: false })
 
     const courseId = core.getInput('course-id', { required: true })
-    const assignmentId = core.getInput('assignment-id', { required: true })
+    const assignmentId = core.getInput('assignment-id', { required: false })
+    const yml = core.getInput('yml', { required: false })
     const zip = core.getInput('zip', { required: false })
     const dir = core.getInput('dir', { required: false })
     const domain = core.getInput('domain', { required: false })
@@ -21,6 +22,9 @@ const main = async () => {
 
     if (!zip && !dir) {
       throw new Error('no source is defined')
+    }
+    if (!yml && !assignmentId) {
+      throw new Error('no destination defined')
     }
     codio.v1.setDomain(domain)
 
@@ -34,7 +38,11 @@ const main = async () => {
     if (zip) {
       await codio.v1.assignment.publishArchive(courseId, assignmentId, zip, changelog)
     } else {
-      await codio.v1.assignment.publish(courseId, assignmentId, dir, changelog)
+      if (yml) {
+        await codio.v1.assignment.reducePublish(courseId, dir, yml, changelog)
+      } else {
+        await codio.v1.assignment.publish(courseId, assignmentId, dir, changelog)
+      }
     }
 
     console.log('publish Completed')

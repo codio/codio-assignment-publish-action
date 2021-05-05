@@ -16,7 +16,10 @@ inputs:
     required: true
   assignment-id:
     description: 'Assignement Id'
-    required: true
+    required: false
+  yml:
+    description: 'Yml configrations folder'
+    required: false
   zip:
     description: 'Path to the zipped module or tar.gz archive'
     required: false
