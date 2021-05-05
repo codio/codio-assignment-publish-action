@@ -8,7 +8,7 @@
   "dependencies": {
     "@actions/core": "^1.2.6",
     "@actions/github": "^4.0.0",
-    "codio-api-js": "^0.0.1"
+    "codio-api-js": "^0.0.2"
   },
   "devDependencies": {
     "@vercel/ncc": "^0.26.1",
