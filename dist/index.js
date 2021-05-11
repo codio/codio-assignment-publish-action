@@ -2180,6 +2180,7 @@ function publishArchive(courseId, assignmentId, archivePath, changelog) {
             for (let i = 0; i < 100; i++) { // 100 checks attempt
                 yield sleep(10);
                 const status = yield getJson(taskUrl, undefined, authHeaders);
+                console.log(status);
                 if (status['done']) {
                     if (status['error']) {
                         throw new Error(status['error']);
@@ -2208,8 +2209,7 @@ function validityState(ymls) {
 function loadYaml(yamlDir) {
     return __awaiter(this, void 0, void 0, function* () {
         let res = [];
-        const files = yield glob_promise_1.default('*.y?ml', { cwd: yamlDir, nodir: true });
-        console.log(files);
+        const files = yield glob_promise_1.default('*.+(yml|yaml)', { cwd: yamlDir, nodir: true });
         for (var file of files) {
             const ymlText = yield fs_1.default.promises.readFile(path_1.default.join(yamlDir, file), { encoding: 'utf-8' });
             let ymls = yaml_1.default.parse(ymlText);

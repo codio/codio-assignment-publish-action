@@ -221,10 +221,10 @@ chownr@^2.0.0:
   resolved "https://registry.yarnpkg.com/chownr/-/chownr-2.0.0.tgz#15bfbe53d2eab4cf70f18a8cd68ebe5b3cb1dece"
   integrity sha512-bIomtDF5KGpdogkLd9VspvFzk9KfpyyGlS8YFVZl7TGPBHL5snIOnxeshwVgPteQ9b4Eydl+pVbIyE1DcvCWgQ==
 
-codio-api-js@^0.0.4:
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/codio-api-js/-/codio-api-js-0.0.4.tgz#24d274f3d6a3c3197b2cc9b7d3a67578222c2d74"
-  integrity sha512-IzhB2OOv7/11Xm54kJm4runM6TZfAi4/EDxl60GB8QG1tgtllC4NHDnBEaI8Sn20cYhZ1Xm3J6vd68p81GnABQ==
+codio-api-js@^0.0.5:
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/codio-api-js/-/codio-api-js-0.0.5.tgz#5b09a9bc293da87ff5731bb38939bdbec9601e16"
+  integrity sha512-XmNZR1XnGKJtQx/xTK8cWVhUAYKSvZ2g8MjZBD6KadjbU/XXEbTM2Vwz7ooDxTha2y5NIBRRTQcfL8jl08Jicw==
   dependencies:
     "@types/bent" "^7.3.2"
     "@types/lodash" "^4.14.168"
