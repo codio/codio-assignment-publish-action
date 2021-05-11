@@ -2230,6 +2230,7 @@ function reducePublish(courseId, srcDir, yamlDir, changelog) {
             const tmpDstDir = fs_1.default.mkdtempSync('/tmp/publish_codio_reduce');
             const paths = item.paths || [];
             paths.push(`!${yamlDir}`); // exclude yaml directory from export
+            paths.push(`!${yamlDir}/**`); // exclude yaml directory from export
             yield tools_1.default.reduce(srcDir, tmpDstDir, item.section, paths);
             yield assignment.publish(courseId, item.assignment, tmpDstDir, changelog);
             fs_1.default.rmdirSync(tmpDstDir, { recursive: true });
@@ -2357,9 +2358,9 @@ const lodash_1 = __importDefault(__webpack_require__(250));
 const recursive_copy_1 = __importDefault(__webpack_require__(9447));
 function copyStripped(srcDir, bookStripped, metadataStriped, dstDir, paths) {
     return __awaiter(this, void 0, void 0, function* () {
-        paths.unshift('.guides/**');
-        paths.unshift('!.github/**');
-        paths.unshift('!.github');
+        paths.push('.guides/**');
+        paths.push('!.github/**');
+        paths.push('!.github');
         yield recursive_copy_1.default(srcDir, dstDir, {
             filter: paths,
             overwrite: true,
