@@ -2141,7 +2141,7 @@ const config_1 = __importDefault(__webpack_require__(2602));
 const lodash_1 = __importDefault(__webpack_require__(250));
 function archiveTar(src) {
     return __awaiter(this, void 0, void 0, function* () {
-        const dir = yield fs_1.default.promises.mkdtemp('codio_export');
+        const dir = yield fs_1.default.promises.mkdtemp('/tmp/codio_export');
         const file = path_1.default.join(dir, 'project.tar.gz');
         yield tar_1.default.c({
             gzip: true,
@@ -2227,8 +2227,10 @@ function reducePublish(courseId, srcDir, yamlDir, changelog) {
         const ymlCfg = yield loadYaml(yamlDir);
         for (const item of ymlCfg) {
             console.log(`publishing ${JSON.stringify(item)}`);
-            const tmpDstDir = fs_1.default.mkdtempSync('publish_codio_reduce');
-            yield tools_1.default.reduce(srcDir, tmpDstDir, item.section, item.paths);
+            const tmpDstDir = fs_1.default.mkdtempSync('/tmp/publish_codio_reduce');
+            const paths = item.paths || [];
+            paths.push(`!${yamlDir}`); // exclude yaml directory from export
+            yield tools_1.default.reduce(srcDir, tmpDstDir, item.section, paths);
             yield assignment.publish(courseId, item.assignment, tmpDstDir, changelog);
             fs_1.default.rmdirSync(tmpDstDir, { recursive: true });
         }
@@ -2356,7 +2358,8 @@ const recursive_copy_1 = __importDefault(__webpack_require__(9447));
 function copyStripped(srcDir, bookStripped, metadataStriped, dstDir, paths) {
     return __awaiter(this, void 0, void 0, function* () {
         paths.unshift('.guides/**');
-        paths.unshift('.github/**');
+        paths.unshift('!.github/**');
+        paths.unshift('!.github');
         yield recursive_copy_1.default(srcDir, dstDir, {
             filter: paths,
             overwrite: true,
