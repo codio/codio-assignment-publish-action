@@ -2191,7 +2191,8 @@ function publishArchive(courseId, assignmentId, archivePath, changelog) {
         }
         catch (error) {
             if (error.json) {
-                error = new Error(yield error.json());
+                const message = JSON.stringify(yield error.json());
+                error = new Error(message);
             }
             throw error;
         }
