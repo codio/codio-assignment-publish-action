@@ -13,7 +13,7 @@
     "@vercel/ncc": "^0.26.1",
     "dotenv": "^8.2.0",
     "typescript": "^4.1.3",
-    "codio-api-js": "^0.0.8"
+    "codio-api-js": "^0.0.9"
   },
   "scripts": {
     "build": "tsc",
