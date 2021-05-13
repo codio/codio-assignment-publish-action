@@ -1,54 +1,50 @@
 import fs from 'fs'
 import * as core from '@actions/core'
-import bent from 'bent'
-import FormData from 'form-data'
+import codio from 'codio-api-js'
 
-
-const getJson = bent('json')
-
-const sleep = async (seconds: number) => new Promise((resolve) => setTimeout(resolve, seconds * 1000))
 
 const main = async () => {
   try {
-    const token = core.getInput('token', { required: true })
+    const token = core.getInput('token', { required: false })
+    const clientId = core.getInput('client-id', { required: false })
+    const secretId = core.getInput('secret-id', { required: false })
+
     const courseId = core.getInput('course-id', { required: true })
-    const assignmentId = core.getInput('assignment-id', { required: true })
-    const zip = core.getInput('zip', { required: true })
+    const assignmentId = core.getInput('assignment-id', { required: false })
+    const yml = core.getInput('yml', { required: false })
+    const zip = core.getInput('zip', { required: false })
+    const dir = core.getInput('dir', { required: false })
     const domain = core.getInput('domain', { required: false })
     const changelog = core.getInput('changelog', { required: false })
-
-    const authHeaders = {
-      'Authorization': 'Bearer ' + token
+    if (!token && !clientId && !secretId) {
+      throw new Error('no Auth Data')
     }
 
-    const api = bent(`https://octopus.${domain}`, 'POST', 'json', 200)
-
-    const postData = new FormData();
-    postData.append('changelog', changelog);
-    postData.append('archive', fs.createReadStream(zip),  {
-      knownLength: fs.statSync(zip).size
-    })
-    console.log('API call')
-    const headers = Object.assign(postData.getHeaders(), authHeaders)
-    headers['Content-Length'] = await postData.getLengthSync()
-    const res = await api(`/api/v1/courses/${courseId}/assignments/${assignmentId}/versions`,
-      postData, headers);
-    const taskUrl = res['taskUri']
-    if (!taskUrl) {
-      throw new Error('task Url not found')
+    if (!zip && !dir) {
+      throw new Error('no source is defined')
     }
-    console.log(`taskUrl ${taskUrl}`)
-    for (let i = 0; i < 100; i++) { // 100 checks attempt
-      await sleep(10)
-      const status = await getJson(taskUrl, undefined, authHeaders)
-      if (status['done']) {
-        if (status['error']) {
-          throw new Error(status['error'])
-        }
-        break
+    if (!yml && !assignmentId) {
+      throw new Error('no destination defined')
+    }
+    codio.v1.setDomain(domain)
+
+    if (!token) {
+      console.log('Authentication')
+      await codio.v1.auth(clientId, secretId)
+    } else {
+      codio.v1.setAuthToken(token)
+    }
+
+    if (zip) {
+      await codio.v1.assignment.publishArchive(courseId, assignmentId, zip, changelog)
+    } else {
+      if (yml) {
+        await codio.v1.assignment.reducePublish(courseId, dir, yml, changelog)
+      } else {
+        await codio.v1.assignment.publish(courseId, assignmentId, dir, changelog)
       }
-
     }
+
     console.log('publish Completed')
 
   } catch (error) {

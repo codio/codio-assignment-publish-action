@@ -4,25 +4,32 @@ description: 'Publishes a new version of assessment'
 inputs:
   token:
     description: 'API access token'
-    required: true
-    default: ''
+    required: false
+  client-id:
+    description: 'Client ID'
+    required: false
+  secret-id:
+    description: 'Secret ID'
+    required: false
   course-id:
     description: 'Course Id'
     required: true
-    default: ''
   assignment-id:
-    description: 'Assignement Id'
-    required: true
-    default: ''
+    description: 'Assignment Id'
+    required: false
+  yml:
+    description: 'Yml configrations folder'
+    required: false
   zip:
     description: 'Path to the zipped module or tar.gz archive'
-    required: true
-    default: ''
+    required: false
+  dir:
+    description: 'directory with the assignment files structure can be used instead of zip'
+    required: false
   changelog:
     description: 'no message'
   domain:
     description: 'API Domain'
-    required: false
     default: 'codio.com'
 runs:
   using: 'node12'
