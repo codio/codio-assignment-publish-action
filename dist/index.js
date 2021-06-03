@@ -2199,13 +2199,26 @@ function publishArchive(courseId, assignmentId, archivePath, changelog) {
     });
 }
 function validityState(ymls) {
-    const assignmentIds = [];
+    const map = new Map();
     for (const yml of ymls) {
-        if (assignmentIds.includes(yml.assignment)) {
-            throw new Error(`assignment ${yml.assignment} defined twice`);
+        const section = lodash_1.default.isString(yml.section) ? [yml.section] : yml.section;
+        if (map.has(yml.assignment)) {
+            const item = map.get(yml.assignment);
+            if (!item) {
+                continue;
+            }
+            item.section.push(section);
+            item.paths = item.paths.concat(yml.paths || []);
         }
-        assignmentIds.push(yml.assignment);
+        else {
+            map.set(yml.assignment, {
+                assignment: yml.assignment,
+                paths: yml.paths || [],
+                section: [section]
+            });
+        }
     }
+    return Array.from(map.values());
 }
 function loadYaml(yamlDir) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -2219,8 +2232,7 @@ function loadYaml(yamlDir) {
             }
             res = res.concat(ymls);
         }
-        validityState(res);
-        return res;
+        return validityState(res);
     });
 }
 function reducePublish(courseId, srcDir, yamlDir, changelog) {
@@ -2360,6 +2372,9 @@ const recursive_copy_1 = __importDefault(__webpack_require__(9447));
 function copyStripped(srcDir, bookStripped, metadataStriped, dstDir, paths) {
     return __awaiter(this, void 0, void 0, function* () {
         paths.push('.guides/**');
+        paths.push('.codio');
+        paths.push('.codio-menu');
+        paths.push('.settings');
         paths.push('!.github/**');
         paths.push('!.github');
         yield recursive_copy_1.default(srcDir, dstDir, {
@@ -2374,9 +2389,22 @@ function copyStripped(srcDir, bookStripped, metadataStriped, dstDir, paths) {
         yield fs_1.promises.writeFile(metadataPath, JSON.stringify(metadataStriped, undefined, ' '));
     });
 }
+// case-insensitive search for title
+function findSection(children, title) {
+    const capitalTitle = lodash_1.default.upperCase(title);
+    for (const item of children) {
+        if (lodash_1.default.upperCase(item.title) === capitalTitle) {
+            return item;
+        }
+    }
+    return undefined;
+}
 function traverseBook(book, sections) {
     const sectionName = sections.shift();
-    const section = lodash_1.default.find(book.children, { title: sectionName });
+    if (!sectionName) {
+        return;
+    }
+    const section = findSection(book.children, sectionName);
     if (!section) {
         throw new Error(`section "${sectionName}" is not found`);
     }
@@ -2400,8 +2428,12 @@ function getSectionIds(book) {
     return ids;
 }
 function stripBook(book, sections) {
-    const section = traverseBook(book, sections);
-    book.children = [section];
+    const children = [];
+    for (const sectionPath of sections) {
+        const section = traverseBook(book, sectionPath);
+        children.push(section);
+    }
+    book.children = children;
     return book;
 }
 function stripMetadata(metadata, book) {
@@ -2413,7 +2445,9 @@ function stripMetadata(metadata, book) {
             newSections.push(section);
         }
         else {
-            excludePaths.push(`!${section['content-file']}`);
+            if (section['content-file']) {
+                excludePaths.push(`!${section['content-file']}`);
+            }
         }
     }
     metadata.sections = newSections;
@@ -2421,10 +2455,6 @@ function stripMetadata(metadata, book) {
 }
 function reduce(srcDir, dstDir, sections, paths) {
     return __awaiter(this, void 0, void 0, function* () {
-        // const assessmentsJson = path.join(srcDir, '.guides', 'assessments.json')
-        if (lodash_1.default.isString(sections)) {
-            sections = [sections];
-        }
         const bookJsonPath = path_1.default.join(srcDir, '.guides', 'book.json');
         const metadataPath = path_1.default.join(srcDir, '.guides', 'metadata.json');
         const bookJson = yield fs_1.promises.readFile(bookJsonPath, { encoding: 'utf-8' });
@@ -2468,8 +2498,8 @@ const auth_1 = __webpack_require__(2113);
 const tools_1 = __importDefault(__webpack_require__(6729));
 const assignment_1 = __importDefault(__webpack_require__(9469));
 exports.v1 = {
-    setDomain: (domain) => config_1.default.setDomain(domain),
-    setAuthToken: (token) => config_1.default.setToken(token),
+    setDomain: (_) => config_1.default.setDomain(_),
+    setAuthToken: (_) => config_1.default.setToken(_),
     auth: (clientId, secretId) => __awaiter(void 0, void 0, void 0, function* () {
         const token = yield auth_1.auth(clientId, secretId, config_1.default.getDomain());
         exports.v1.setAuthToken(token);
