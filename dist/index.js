@@ -2184,6 +2184,25 @@ exports.default = {
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -2205,7 +2224,7 @@ const tar_1 = __importDefault(__nccwpck_require__(4674));
 const glob_promise_1 = __importDefault(__nccwpck_require__(8252));
 const yaml_1 = __importDefault(__nccwpck_require__(3552));
 const tools_1 = __importDefault(__nccwpck_require__(6729));
-const config_1 = __importDefault(__nccwpck_require__(2602));
+const config_1 = __importStar(__nccwpck_require__(2602));
 const lodash_1 = __importDefault(__nccwpck_require__(250));
 function archiveTar(src) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -2214,7 +2233,15 @@ function archiveTar(src) {
         yield tar_1.default.c({
             gzip: true,
             file,
-            cwd: src
+            cwd: src,
+            filter: (path) => {
+                for (const exclude of config_1.excludePaths) {
+                    if (lodash_1.default.startsWith(path, exclude)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
         }, ['./']);
         return { file, dir };
     });
@@ -2378,6 +2405,7 @@ exports.auth = auth;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.excludePaths = void 0;
 const VALID_DOMAINS = [
     'codio.com',
     'codio.co.uk',
@@ -2411,6 +2439,11 @@ class Config {
 }
 const config = new Config();
 exports.default = config;
+exports.excludePaths = [
+    '.git',
+    '.github',
+    '.gitignore',
+];
 
 
 /***/ }),
@@ -2437,6 +2470,7 @@ const path_1 = __importDefault(__nccwpck_require__(5622));
 const fs_1 = __nccwpck_require__(5747);
 const lodash_1 = __importDefault(__nccwpck_require__(250));
 const recursive_copy_1 = __importDefault(__nccwpck_require__(9447));
+const config_1 = __nccwpck_require__(2602);
 function copyStripped(srcDir, bookStripped, metadataStriped, dstDir, paths) {
     return __awaiter(this, void 0, void 0, function* () {
         paths.push('.guides/**');
@@ -2444,7 +2478,9 @@ function copyStripped(srcDir, bookStripped, metadataStriped, dstDir, paths) {
         paths.push('.codio-menu');
         paths.push('.settings');
         paths.push('!.github/**');
-        paths.push('!.github');
+        for (const path of config_1.excludePaths) {
+            paths.push(`!${path}`);
+        }
         yield recursive_copy_1.default(srcDir, dstDir, {
             filter: paths,
             overwrite: true,
