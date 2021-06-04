@@ -2207,6 +2207,11 @@ const yaml_1 = __importDefault(__nccwpck_require__(3552));
 const tools_1 = __importDefault(__nccwpck_require__(6729));
 const config_1 = __importDefault(__nccwpck_require__(2602));
 const lodash_1 = __importDefault(__nccwpck_require__(250));
+const excludePaths = [
+    '.git',
+    '.github',
+    '.gitignore',
+];
 function archiveTar(src) {
     return __awaiter(this, void 0, void 0, function* () {
         const dir = yield fs_1.default.promises.mkdtemp('/tmp/codio_export');
@@ -2214,7 +2219,15 @@ function archiveTar(src) {
         yield tar_1.default.c({
             gzip: true,
             file,
-            cwd: src
+            cwd: src,
+            filter: (path) => {
+                for (const exclude of excludePaths) {
+                    if (lodash_1.default.startsWith(path, exclude)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
         }, ['./']);
         return { file, dir };
     });
