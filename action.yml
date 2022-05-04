@@ -13,9 +13,15 @@ inputs:
     required: false
   course-id:
     description: 'Course Id'
-    required: true
+    required: false
+  course-name:
+    description: 'Course Name'
+    required: false
   assignment-id:
     description: 'Assignment Id'
+    required: false
+  assignment-name:
+    description: 'Assignment Name'
     required: false
   yml:
     description: 'Yml configrations folder'
