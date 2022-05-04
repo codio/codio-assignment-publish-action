@@ -19,6 +19,16 @@ steps:
     zip: new_version.zip
 ```
 
+```yaml
+- uses: codio/codio-assignment-publish-action
+  with:
+    token: api-token
+    course-name: my-course-name
+    assignment-name: my-assignment-name
+    changelog: message
+    zip: new_version.zip
+```
+
 Directory publish
 ```yaml
 steps:
