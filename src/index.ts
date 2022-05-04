@@ -47,7 +47,7 @@ const main = async () => {
       const courseInfo = await codio.v1.course.findOneByName(courseName)
       courseId = courseInfo.id
       if (assignmentName && !assignmentId) {
-        for (const unit of courseInfo.units) {
+        for (const unit of courseInfo.modules) {
           for (const assignment of unit.assignments) {
             if (assignment.name === assignmentName) {
               if (!foundAssignment) {

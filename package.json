@@ -11,7 +11,7 @@
   },
   "devDependencies": {
     "@vercel/ncc": "^0.26.1",
-    "codio-api-js": "https://github.com/codio/codio-api-js#13905_find_course_by_name",
+    "codio-api-js": "codio/codio-api-js#425eb9af93ec04d8fd70e08b7d746961315bad0b",
     "dotenv": "^8.2.0",
     "typescript": "^4.1.3"
   },
