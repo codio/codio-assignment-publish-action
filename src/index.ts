@@ -42,10 +42,12 @@ const main = async () => {
     }
 
     let foundAssignment
+    let courseModules
 
     if (courseName && !courseId) {
       const courseInfo = await codio.v1.course.findOneByName(courseName)
       courseId = courseInfo.id
+      courseModules = courseInfo.modules
       if (assignmentName && !assignmentId) {
         for (const unit of courseInfo.modules) {
           for (const assignment of unit.assignments) {
@@ -53,12 +55,14 @@ const main = async () => {
               if (!foundAssignment) {
                 foundAssignment = assignment
               } else {
-                throw new Error('many assignments with same name')
+                throw new Error(`many assignments with same name ${assignmentName}`)
               }
             }
           }
         }
       }
+    } else {
+      courseModules = await codio.v1.course.info(courseId)
     }
     if (foundAssignment) {
       assignmentId = foundAssignment.id
@@ -69,7 +73,7 @@ const main = async () => {
       await codio.v1.assignment.publishArchive(courseId, assignmentId, zip, changelog)
     } else {
       if (yml) {
-        await codio.v1.assignment.reducePublish(courseId, dir, yml, changelog)
+        await codio.v1.assignment.reducePublish(courseId, dir, yml, changelog, courseModules)
       } else {
         await codio.v1.assignment.publish(courseId, assignmentId, dir, changelog)
       }
