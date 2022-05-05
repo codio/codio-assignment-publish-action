@@ -81,7 +81,7 @@ const main = async () => {
 
     console.log('publish Completed')
 
-  } catch (error) {
+  } catch (error: any) {
     if (error.json) {
       console.log(await error.json())
     }
