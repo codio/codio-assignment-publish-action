@@ -1536,7 +1536,7 @@ const config_1 = __importDefault(__nccwpck_require__(2602));
 const tools_1 = __nccwpck_require__(6729);
 const getJson = (0, bent_1.default)('json');
 function getApiV1Url() {
-    return `https://octopus.${config_1.default.getDomain()}/api/v1/`;
+    return `https://octopus.${config_1.default.getDomain()}/api/v1`;
 }
 function info(courseId) {
     return __awaiter(this, void 0, void 0, function* () {
