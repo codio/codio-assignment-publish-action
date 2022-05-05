@@ -1405,6 +1405,9 @@ function reducePublish(courseId, srcDir, yamlDir, changelog, courseModules) {
             else {
                 assignmentId = item.assignment;
             }
+            if (!assignmentId) {
+                throw new Error(`assignment not found id=${item.assignment} name=${item.assignmentName}}`);
+            }
             yield tools_1.default.reduce(srcDir, tmpDstDir, item.section, paths);
             yield assignment.publish(courseId, assignmentId, tmpDstDir, changelog);
             fs_1.default.rmdirSync(tmpDstDir, { recursive: true });
