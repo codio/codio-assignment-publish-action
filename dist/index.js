@@ -1406,7 +1406,7 @@ function reducePublish(courseId, srcDir, yamlDir, changelog, courseModules) {
                 assignmentId = item.assignment;
             }
             if (!assignmentId) {
-                throw new Error(`assignment not found id=${item.assignment} name=${item.assignmentName}}`);
+                throw new Error(`assignment not found with name "${item.assignmentName}}"`);
             }
             yield tools_1.default.reduce(srcDir, tmpDstDir, item.section, paths);
             yield assignment.publish(courseId, assignmentId, tmpDstDir, changelog);
@@ -50535,7 +50535,7 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
         }
         if (zip) {
             if (!assignmentId) {
-                throw new Error(`assignment not found id=${assignmentId} name=${assignmentName}`);
+                throw new Error(`assignment not found with name "${assignmentName}"`);
             }
             yield codio_api_js_1.default.v1.assignment.publishArchive(courseId, assignmentId, zip, changelog);
         }
@@ -50545,7 +50545,7 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
             }
             else {
                 if (!assignmentId) {
-                    throw new Error(`assignment not found id=${assignmentId} name=${assignmentName}`);
+                    throw new Error(`assignment not found with name "${assignmentName}"`);
                 }
                 yield codio_api_js_1.default.v1.assignment.publish(courseId, assignmentId, dir, changelog);
             }
