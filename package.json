@@ -11,7 +11,7 @@
   },
   "devDependencies": {
     "@vercel/ncc": "^0.26.1",
-    "codio-api-js": "codio/codio-api-js#c405c064e93e6a8563a75c7494f94ff2aca206cf",
+    "codio-api-js": "codio/codio-api-js#86e285e08e68f2272ab0c8bc52cec701bdf8b287",
     "dotenv": "^8.2.0",
     "typescript": "^4.1.3"
   },

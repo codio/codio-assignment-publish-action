@@ -1563,7 +1563,7 @@ function info(courseId) {
     });
 }
 exports.info = info;
-function findOneByName(courseName) {
+function findOneByName(courseName, withHiddenAssignments) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!config_1.default) {
             throw new Error('No Config');
@@ -1573,7 +1573,10 @@ function findOneByName(courseName) {
             const authHeaders = {
                 'Authorization': `Bearer ${token}`
             };
-            const params = { name: courseName };
+            const params = {
+                name: courseName,
+                withHiddenAssignments: withHiddenAssignments ? 'true' : 'false'
+            };
             const urlParams = new URLSearchParams(params);
             return getJson(`${getApiV1Url()}/courses?${urlParams.toString()}`, undefined, authHeaders);
         }
@@ -50509,7 +50512,7 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
         let foundAssignment;
         let courseModules;
         if (courseName && !courseId) {
-            const courseInfo = yield codio_api_js_1.default.v1.course.findOneByName(courseName);
+            const courseInfo = yield codio_api_js_1.default.v1.course.findOneByName(courseName, true);
             courseId = courseInfo.id;
             courseModules = courseInfo.modules;
             if (assignmentName && !assignmentId) {
