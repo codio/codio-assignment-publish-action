@@ -70,11 +70,17 @@ const main = async () => {
     
 
     if (zip) {
+      if (!assignmentId) {
+        throw new Error(`assignment not found id=${assignmentId} name=${assignmentName}`)
+      }
       await codio.v1.assignment.publishArchive(courseId, assignmentId, zip, changelog)
     } else {
       if (yml) {
         await codio.v1.assignment.reducePublish(courseId, dir, yml, changelog, courseModules)
       } else {
+        if (!assignmentId) {
+          throw new Error(`assignment not found id=${assignmentId} name=${assignmentName}`)
+        }
         await codio.v1.assignment.publish(courseId, assignmentId, dir, changelog)
       }
     }

@@ -50534,6 +50534,9 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
             assignmentId = foundAssignment.id;
         }
         if (zip) {
+            if (!assignmentId) {
+                throw new Error(`assignment not found id=${assignmentId} name=${assignmentName}`);
+            }
             yield codio_api_js_1.default.v1.assignment.publishArchive(courseId, assignmentId, zip, changelog);
         }
         else {
@@ -50541,6 +50544,9 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
                 yield codio_api_js_1.default.v1.assignment.reducePublish(courseId, dir, yml, changelog, courseModules);
             }
             else {
+                if (!assignmentId) {
+                    throw new Error(`assignment not found id=${assignmentId} name=${assignmentName}`);
+                }
                 yield codio_api_js_1.default.v1.assignment.publish(courseId, assignmentId, dir, changelog);
             }
         }
