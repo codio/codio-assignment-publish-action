@@ -1299,10 +1299,11 @@ function publishArchive(courseId, assignmentId, archivePath, changelog) {
         }
         try {
             const token = config_1.default.getToken();
+            const domain = config_1.default.getDomain();
             const authHeaders = {
                 'Authorization': `Bearer ${token}`
             };
-            const api = (0, bent_1.default)((0, tools_1.getApiV1Url)(), 'POST', 'json', 200);
+            const api = (0, bent_1.default)(`https://octopus.${domain}`, 'POST', 'json', 200);
             const postData = new form_data_1.default();
             postData.append('changelog', changelog);
             postData.append('archive', fs_1.default.createReadStream(archivePath), {
