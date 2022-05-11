@@ -1259,6 +1259,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.updateSettings = exports.getSettings = void 0;
 const fs_1 = __importDefault(__nccwpck_require__(5747));
 const path_1 = __importDefault(__nccwpck_require__(5622));
 const bent_1 = __importDefault(__nccwpck_require__(5929));
@@ -1266,7 +1267,7 @@ const form_data_1 = __importDefault(__nccwpck_require__(9807));
 const tar_1 = __importDefault(__nccwpck_require__(8800));
 const glob_promise_1 = __importDefault(__nccwpck_require__(4311));
 const yaml_1 = __importDefault(__nccwpck_require__(7912));
-const tools_1 = __importDefault(__nccwpck_require__(6729));
+const tools_1 = __importStar(__nccwpck_require__(6729));
 const config_1 = __importStar(__nccwpck_require__(2602));
 const lodash_1 = __importDefault(__nccwpck_require__(4749));
 function archiveTar(src) {
@@ -1298,18 +1299,17 @@ function publishArchive(courseId, assignmentId, archivePath, changelog) {
         }
         try {
             const token = config_1.default.getToken();
-            const domain = config_1.default.getDomain();
             const authHeaders = {
                 'Authorization': `Bearer ${token}`
             };
-            const api = (0, bent_1.default)(`https://octopus.${domain}`, 'POST', 'json', 200);
+            const api = (0, bent_1.default)((0, tools_1.getApiV1Url)(), 'POST', 'json', 200);
             const postData = new form_data_1.default();
             postData.append('changelog', changelog);
             postData.append('archive', fs_1.default.createReadStream(archivePath), {
                 knownLength: fs_1.default.statSync(archivePath).size
             });
             const headers = Object.assign(postData.getHeaders(), authHeaders);
-            headers['Content-Length'] = yield postData.getLengthSync();
+            headers['Content-Length'] = postData.getLengthSync();
             const res = yield api(`/api/v1/courses/${courseId}/assignments/${assignmentId}/versions`, postData, headers);
             const taskUrl = res['taskUri'];
             if (!taskUrl) {
@@ -1378,9 +1378,10 @@ function loadYaml(yamlDir) {
         return validityState(res);
     });
 }
-function reducePublish(courseId, srcDir, yamlDir, changelog, courseModules) {
+function reducePublish(course, srcDir, yamlDir, changelog) {
     return __awaiter(this, void 0, void 0, function* () {
         const ymlCfg = yield loadYaml(yamlDir);
+        const courseId = typeof course === 'string' ? course : course.id;
         for (const item of ymlCfg) {
             console.log(`publishing ${JSON.stringify(item)}`);
             const tmpDstDir = fs_1.default.mkdtempSync('/tmp/publish_codio_reduce');
@@ -1388,8 +1389,8 @@ function reducePublish(courseId, srcDir, yamlDir, changelog, courseModules) {
             paths.push(`!${yamlDir}`); // exclude yaml directory from export
             paths.push(`!${yamlDir}/**`); // exclude yaml directory from export
             let assignmentId;
-            if (item.assignmentName && courseModules !== undefined) {
-                for (const module of courseModules) {
+            if (item.assignmentName && typeof course !== 'string') {
+                for (const module of course.modules) {
                     for (const assignment of module.assignments) {
                         if (assignment.name === item.assignmentName) {
                             if (assignmentId) {
@@ -1414,6 +1415,103 @@ function reducePublish(courseId, srcDir, yamlDir, changelog, courseModules) {
         }
     });
 }
+function getSettings(courseId, assignmentId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return updateSettings(courseId, assignmentId, {});
+    });
+}
+exports.getSettings = getSettings;
+function convertDateToLocal(date) {
+    if (!date) {
+        return null;
+    }
+    return new Date(date);
+}
+function toRawSettings(settings) {
+    const res = {};
+    if (settings.enableResetAssignmentByStudent !== undefined) {
+        res.enableResetAssignmentByStudent = settings.enableResetAssignmentByStudent;
+    }
+    if (settings.disableDownloadByStudent !== undefined) {
+        res.disableDownloadByStudent = settings.disableDownloadByStudent;
+    }
+    if (settings.visibilityOnDisabled !== undefined) {
+        res.visibilityOnDisabled = settings.visibilityOnDisabled;
+    }
+    if (settings.visibilityOnCompleted !== undefined) {
+        res.visibilityOnCompleted = settings.visibilityOnCompleted;
+    }
+    if (settings.startTime !== undefined) {
+        res.startTime = settings.startTime ? settings.startTime.toISOString() : '';
+    }
+    if (settings.endTime !== undefined) {
+        res.endTime = settings.endTime ? settings.endTime.toISOString() : '';
+    }
+    if (settings.action !== undefined) {
+        res.action = settings.action;
+    }
+    if (settings.penalties !== undefined) {
+        res.penalties = lodash_1.default.map(settings.penalties, _ => {
+            validatePenalty(_);
+            return {
+                id: _.id,
+                datetime: _.datetime.toISOString(),
+                percent: _.percent,
+                message: _.message,
+            };
+        });
+    }
+    return res;
+}
+function validatePenalty(penalty) {
+    if (!lodash_1.default.isNumber(penalty.id) || !lodash_1.default.isFinite(penalty.id)) {
+        throw new Error("penalty id must be a number and present");
+    }
+    if (lodash_1.default.isNumber(penalty.percent) && (penalty.percent < 0 || penalty.percent > 100)) {
+        throw new Error("penalty percent must be a number between 0 and 100");
+    }
+    if (!lodash_1.default.isDate(penalty.datetime)) {
+        throw new Error("penalty date must be a Date object");
+    }
+}
+function updateSettings(courseId, assignmentId, settings) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!config_1.default) {
+            throw new Error('No Config');
+        }
+        try {
+            const token = config_1.default.getToken();
+            const authHeaders = { 'Authorization': `Bearer ${token}` };
+            const api = (0, bent_1.default)((0, tools_1.getApiV1Url)(), 'POST', 'json', 200);
+            const res = yield api(`/courses/${courseId}/assignments/${assignmentId}/settings`, toRawSettings(settings), authHeaders);
+            return {
+                enableResetAssignmentByStudent: res.enableResetAssignmentByStudent,
+                disableDownloadByStudent: res.disableDownloadByStudent,
+                visibilityOnDisabled: res.visibilityOnDisabled,
+                visibilityOnCompleted: res.visibilityOnCompleted,
+                startTime: convertDateToLocal(res.startTime),
+                endTime: convertDateToLocal(res.endTime),
+                action: res.action,
+                penalties: res.penalties ? lodash_1.default.map(res.penalties, _ => {
+                    return {
+                        id: _.id,
+                        datetime: new Date(_.datetime),
+                        percent: _.percent,
+                        message: _.message,
+                    };
+                }) : undefined,
+            };
+        }
+        catch (error) {
+            if (error.json) {
+                const message = JSON.stringify(yield error.json());
+                throw new Error(message);
+            }
+            throw error;
+        }
+    });
+}
+exports.updateSettings = updateSettings;
 const assignment = {
     publish: (courseId, assignmentId, projectPath, changelog) => __awaiter(void 0, void 0, void 0, function* () {
         const { file, dir } = yield archiveTar(projectPath);
@@ -1421,7 +1519,9 @@ const assignment = {
         fs_1.default.rmdirSync(dir, { recursive: true });
     }),
     publishArchive,
-    reducePublish
+    reducePublish,
+    updateSettings,
+    getSettings,
 };
 exports.default = assignment;
 
@@ -1531,16 +1631,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.updateAssignmentSettings = exports.exportAssessmentData = exports.exportAssignmentCSV = exports.exportStudentCSV = exports.downloadAssessmentData = exports.downloadAssignmentCSV = exports.downloadStudentCSV = exports.downloadStudentAssignment = exports.exportStudentAssignment = exports.waitDownloadTask = exports.assignmentStudentsProgress = exports.findOneByName = exports.info = void 0;
+exports.updateAssignmentSettings = exports.exportAssessmentData = exports.exportAssignmentCSV = exports.exportStudentCSV = exports.downloadAssessmentData = exports.downloadAssignmentCSV = exports.downloadStudentCSV = exports.downloadStudentAssignment = exports.exportStudentAssignment = exports.waitDownloadTask = exports.assignmentStudentsProgress = exports.findByName = exports.info = void 0;
 const bent_1 = __importDefault(__nccwpck_require__(5929));
 const https_1 = __importDefault(__nccwpck_require__(7211));
 const fs_1 = __importDefault(__nccwpck_require__(5747));
 const config_1 = __importDefault(__nccwpck_require__(2602));
 const tools_1 = __nccwpck_require__(6729);
 const getJson = (0, bent_1.default)('json');
-function getApiV1Url() {
-    return `https://octopus.${config_1.default.getDomain()}/api/v1`;
-}
 function info(courseId) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!config_1.default) {
@@ -1551,7 +1648,7 @@ function info(courseId) {
             const authHeaders = {
                 'Authorization': `Bearer ${token}`
             };
-            return getJson(`${getApiV1Url()}/courses/${courseId}`, undefined, authHeaders);
+            return getJson(`${(0, tools_1.getApiV1Url)()}/courses/${courseId}`, undefined, authHeaders);
         }
         catch (error) {
             if (error.json) {
@@ -1563,7 +1660,7 @@ function info(courseId) {
     });
 }
 exports.info = info;
-function findOneByName(courseName, withHiddenAssignments) {
+function findByName(courseName, withHiddenAssignments) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!config_1.default) {
             throw new Error('No Config');
@@ -1578,7 +1675,7 @@ function findOneByName(courseName, withHiddenAssignments) {
                 withHiddenAssignments: withHiddenAssignments ? 'true' : 'false'
             };
             const urlParams = new URLSearchParams(params);
-            return getJson(`${getApiV1Url()}/courses?${urlParams.toString()}`, undefined, authHeaders);
+            return getJson(`${(0, tools_1.getApiV1Url)()}/courses?${urlParams.toString()}`, undefined, authHeaders);
         }
         catch (error) {
             if (error.json) {
@@ -1589,7 +1686,7 @@ function findOneByName(courseName, withHiddenAssignments) {
         }
     });
 }
-exports.findOneByName = findOneByName;
+exports.findByName = findByName;
 function assignmentStudentsProgress(courseId, assignmentId) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!config_1.default) {
@@ -1600,7 +1697,7 @@ function assignmentStudentsProgress(courseId, assignmentId) {
             const authHeaders = {
                 'Authorization': `Bearer ${token}`
             };
-            const res = yield getJson(`${getApiV1Url()}/courses/${courseId}/assignments/${assignmentId}/students`, undefined, authHeaders);
+            const res = yield getJson(`${(0, tools_1.getApiV1Url)()}/courses/${courseId}/assignments/${assignmentId}/students`, undefined, authHeaders);
             for (const progress of res) {
                 if (progress.completion_date) {
                     progress.completion_date = (0, tools_1.secondsToDate)(progress.completion_date.seconds);
@@ -1658,7 +1755,7 @@ function exportStudentAssignment(courseId, assignmentId, studentId) {
             const authHeaders = {
                 'Authorization': `Bearer ${token}`
             };
-            const res = yield getJson(`${getApiV1Url()}/courses/${courseId}/assignments/${assignmentId}/students/${studentId}/download`, undefined, authHeaders);
+            const res = yield getJson(`${(0, tools_1.getApiV1Url)()}/courses/${courseId}/assignments/${assignmentId}/students/${studentId}/download`, undefined, authHeaders);
             const taskUrl = res['taskUri'];
             if (!taskUrl) {
                 throw new Error('task Url not found');
@@ -1735,7 +1832,7 @@ function exportStudentCSV(courseId, studentId) {
             const authHeaders = {
                 'Authorization': `Bearer ${token}`
             };
-            return yield getJson(`${getApiV1Url()}/courses/${courseId}/students/${studentId}/export/csv`, undefined, authHeaders);
+            return yield getJson(`${(0, tools_1.getApiV1Url)()}/courses/${courseId}/students/${studentId}/export/csv`, undefined, authHeaders);
         }
         catch (error) {
             if (error.json) {
@@ -1757,7 +1854,7 @@ function exportAssignmentCSV(courseId, assignmentId) {
             const authHeaders = {
                 'Authorization': `Bearer ${token}`
             };
-            return yield getJson(`${getApiV1Url()}/courses/${courseId}/assignments/${assignmentId}/export/csv`, undefined, authHeaders);
+            return yield getJson(`${(0, tools_1.getApiV1Url)()}/courses/${courseId}/assignments/${assignmentId}/export/csv`, undefined, authHeaders);
         }
         catch (error) {
             if (error.json) {
@@ -1779,7 +1876,7 @@ function exportAssessmentData(courseId, assignmentIds) {
             const authHeaders = {
                 'Authorization': `Bearer ${token}`
             };
-            const res = yield getJson(`${getApiV1Url()}/courses/${courseId}/export/assessments/csv?assignmentIds=${assignmentIds}`, undefined, authHeaders);
+            const res = yield getJson(`${(0, tools_1.getApiV1Url)()}/courses/${courseId}/export/assessments/csv?assignmentIds=${assignmentIds}`, undefined, authHeaders);
             const taskUrl = res['taskUri'];
             if (!taskUrl) {
                 throw new Error('task Url not found');
@@ -1806,7 +1903,7 @@ function updateAssignmentSettings(courseId, assignmentId, jsonFilePath) {
             const authHeaders = { 'Authorization': `Bearer ${token}` };
             const jsonString = yield fs_1.default.promises.readFile(jsonFilePath, { encoding: 'utf8' });
             const jsonParams = JSON.parse(jsonString);
-            const api = (0, bent_1.default)(`${getApiV1Url()}`, 'POST', 'json', 200);
+            const api = (0, bent_1.default)(`${(0, tools_1.getApiV1Url)()}`, 'POST', 'json', 200);
             const result = yield api(`/courses/${courseId}/assignments/${assignmentId}/settings`, jsonParams, authHeaders);
             console.log(result);
         }
@@ -1832,7 +1929,7 @@ const course = {
     downloadAssignmentCSV,
     downloadAssessmentData,
     updateAssignmentSettings,
-    findOneByName
+    findByName
 };
 exports.default = course;
 
@@ -1986,7 +2083,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.secondsToDate = exports.createTar = exports.mapToObject = exports.reduce = void 0;
+exports.getApiV1Url = exports.secondsToDate = exports.createTar = exports.mapToObject = exports.reduce = void 0;
 const path_1 = __importDefault(__nccwpck_require__(5622));
 const fs_1 = __importDefault(__nccwpck_require__(5747));
 const lodash_1 = __importDefault(__nccwpck_require__(4749));
@@ -1994,6 +2091,7 @@ const recursive_copy_1 = __importDefault(__nccwpck_require__(4890));
 const config_1 = __nccwpck_require__(2602);
 const tar_1 = __importDefault(__nccwpck_require__(8800));
 const simple_zstd_1 = __nccwpck_require__(9352);
+const config_2 = __importDefault(__nccwpck_require__(2602));
 function copyStripped(srcDir, bookStripped, metadataStriped, dstDir, paths) {
     return __awaiter(this, void 0, void 0, function* () {
         paths.push('.guides/**');
@@ -2139,6 +2237,10 @@ function secondsToDate(seconds) {
     return t;
 }
 exports.secondsToDate = secondsToDate;
+function getApiV1Url() {
+    return `https://octopus.${config_2.default.getDomain()}/api/v1`;
+}
+exports.getApiV1Url = getApiV1Url;
 const tools = {
     reduce,
     mapToObject,
@@ -50510,11 +50612,10 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
             codio_api_js_1.default.v1.setAuthToken(token);
         }
         let foundAssignment;
-        let courseModules;
+        let courseInfo;
         if (courseName && !courseId) {
-            const courseInfo = yield codio_api_js_1.default.v1.course.findOneByName(courseName, true);
+            courseInfo = yield codio_api_js_1.default.v1.course.findByName(courseName, true);
             courseId = courseInfo.id;
-            courseModules = courseInfo.modules;
             if (assignmentName && !assignmentId) {
                 for (const unit of courseInfo.modules) {
                     for (const assignment of unit.assignments) {
@@ -50531,7 +50632,7 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
             }
         }
         else {
-            courseModules = yield codio_api_js_1.default.v1.course.info(courseId);
+            courseInfo = yield codio_api_js_1.default.v1.course.info(courseId);
         }
         if (foundAssignment) {
             assignmentId = foundAssignment.id;
@@ -50544,7 +50645,7 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
         }
         else {
             if (yml) {
-                yield codio_api_js_1.default.v1.assignment.reducePublish(courseId, dir, yml, changelog, courseModules);
+                yield codio_api_js_1.default.v1.assignment.reducePublish(courseInfo || courseId, dir, yml, changelog);
             }
             else {
                 if (!assignmentId) {

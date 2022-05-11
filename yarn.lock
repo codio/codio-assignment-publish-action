@@ -212,13 +212,13 @@ chownr@^2.0.0:
   resolved "https://registry.yarnpkg.com/chownr/-/chownr-2.0.0.tgz#15bfbe53d2eab4cf70f18a8cd68ebe5b3cb1dece"
   integrity sha512-bIomtDF5KGpdogkLd9VspvFzk9KfpyyGlS8YFVZl7TGPBHL5snIOnxeshwVgPteQ9b4Eydl+pVbIyE1DcvCWgQ==
 
-codio-api-js@codio/codio-api-js#86e285e08e68f2272ab0c8bc52cec701bdf8b287:
+codio-api-js@codio/codio-api-js#e8996f583f1cde14cb44055264303dda32d34c2b:
   version "0.6.4"
-  resolved "https://codeload.github.com/codio/codio-api-js/tar.gz/86e285e08e68f2272ab0c8bc52cec701bdf8b287"
+  resolved "https://codeload.github.com/codio/codio-api-js/tar.gz/e8996f583f1cde14cb44055264303dda32d34c2b"
   dependencies:
     bent "^7.3.12"
     form-data "^4.0.0"
-    glob-promise "^4.1.0"
+    glob-promise "^4.2.0"
     https "^1.0.0"
     lodash "^4.17.21"
     object-hash "^2.2.0"
@@ -311,7 +311,7 @@ fs.realpath@^1.0.0:
   resolved "https://registry.yarnpkg.com/fs.realpath/-/fs.realpath-1.0.0.tgz#1504ad2523158caa40db4a2787cb01411994ea4f"
   integrity sha1-FQStJSMVjKpA20onh8sBQRmU6k8=
 
-glob-promise@^4.1.0:
+glob-promise@^4.2.0:
   version "4.2.2"
   resolved "https://registry.yarnpkg.com/glob-promise/-/glob-promise-4.2.2.tgz#15f44bcba0e14219cd93af36da6bb905ff007877"
   integrity sha512-xcUzJ8NWN5bktoTIX7eOclO1Npxd/dyVqUJxlLIDasT4C7KZyqlPIwkdJ0Ypiy3p2ZKahTjK4M9uC3sNSfNMzw==
