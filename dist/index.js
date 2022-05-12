@@ -1368,6 +1368,34 @@ function validityState(ymls) {
     }
     return Array.from(map.values());
 }
+// after find names should regroup assignments by id
+function validateYmlCfg(ymls) {
+    const map = new Map();
+    for (const yml of ymls) {
+        const section = yml.section;
+        const assignmentId = yml.assignment;
+        if (assignmentId === undefined) {
+            throw new Error('assignment does not exist');
+        }
+        if (map.has(assignmentId)) {
+            const item = map.get(assignmentId);
+            if (!item) {
+                continue;
+            }
+            item.section = item.section.concat(section);
+            item.paths = item.paths.concat(yml.paths || []);
+        }
+        else {
+            map.set(assignmentId, {
+                assignment: yml.assignment,
+                assignmentName: yml.assignmentName,
+                paths: yml.paths || [],
+                section: section
+            });
+        }
+    }
+    return Array.from(map.values());
+}
 function loadYaml(yamlDir) {
     return __awaiter(this, void 0, void 0, function* () {
         let res = [];
@@ -1406,8 +1434,9 @@ function findNames(courseId, ymlCfg) {
 }
 function reducePublish(courseId, srcDir, yamlDir, changelog) {
     return __awaiter(this, void 0, void 0, function* () {
-        const ymlCfg = yield loadYaml(yamlDir);
+        let ymlCfg = yield loadYaml(yamlDir);
         yield findNames(courseId, ymlCfg);
+        ymlCfg = validateYmlCfg(ymlCfg);
         for (const item of ymlCfg) {
             console.log(`publishing ${JSON.stringify(item)}`);
             const tmpDstDir = fs_1.default.mkdtempSync('/tmp/publish_codio_reduce');
