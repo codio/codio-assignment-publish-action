@@ -469,7 +469,10 @@ exports.toCommandValue = toCommandValue;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.v1 = void 0;
 const v1_1 = __nccwpck_require__(1253);
+var v1_2 = __nccwpck_require__(1253);
+Object.defineProperty(exports, "v1", ({ enumerable: true, get: function () { return v1_2.v1; } }));
 exports.default = {
     v1: v1_1.v1
 };
@@ -1388,7 +1391,7 @@ function findNames(courseId, ymlCfg) {
         }
         const course = yield (0, course_1.info)(courseId);
         for (const item of ymlCfg) {
-            if (item.assignmentName) {
+            if (!item.assignment && item.assignmentName) { // make id higher priority
                 const assignments = lodash_1.default.filter(course.assignments, { name: item.assignmentName });
                 if (assignments.length == 0) {
                     throw new Error(`no assignments in course with name ${item.assignmentName} is found`);
@@ -1647,7 +1650,7 @@ const getJson = (0, bent_1.default)('json');
 function flattenAssignments(course) {
     course.assignments = lodash_1.default.flatten(lodash_1.default.map(course.modules, 'assignments'));
 }
-function info(courseId) {
+function info(courseId, withHiddenAssignments = true) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!config_1.default) {
             throw new Error('No Config');
@@ -1657,7 +1660,11 @@ function info(courseId) {
             const authHeaders = {
                 'Authorization': `Bearer ${token}`
             };
-            const course = yield getJson(`${(0, tools_1.getApiV1Url)()}/courses/${courseId}`, undefined, authHeaders);
+            const params = {
+                withHiddenAssignments: withHiddenAssignments ? 'true' : 'false'
+            };
+            const urlParams = new URLSearchParams(params);
+            const course = yield getJson(`${(0, tools_1.getApiV1Url)()}/courses/${courseId}?${urlParams.toString()}`, undefined, authHeaders);
             flattenAssignments(course);
             return course;
         }
