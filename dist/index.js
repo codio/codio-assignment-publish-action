@@ -1270,6 +1270,7 @@ const yaml_1 = __importDefault(__nccwpck_require__(7912));
 const tools_1 = __importStar(__nccwpck_require__(6729));
 const config_1 = __importStar(__nccwpck_require__(2602));
 const lodash_1 = __importDefault(__nccwpck_require__(4749));
+const course_1 = __nccwpck_require__(8554);
 function archiveTar(src) {
     return __awaiter(this, void 0, void 0, function* () {
         const dir = yield fs_1.default.promises.mkdtemp('/tmp/codio_export');
@@ -1379,39 +1380,42 @@ function loadYaml(yamlDir) {
         return validityState(res);
     });
 }
-function reducePublish(course, srcDir, yamlDir, changelog) {
+function findNames(courseId, ymlCfg) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const usesNames = (0, lodash_1.default)(ymlCfg).map('assignmentName').compact().size() > 0;
+        if (!usesNames) {
+            return;
+        }
+        const course = yield (0, course_1.info)(courseId);
+        for (const item of ymlCfg) {
+            if (item.assignmentName) {
+                const assignments = lodash_1.default.filter(course.assignments, { name: item.assignmentName });
+                if (assignments.length == 0) {
+                    throw new Error(`no assignments in course with name ${item.assignmentName} is found`);
+                }
+                if (assignments.length > 1) {
+                    throw new Error(`many assignments in course with same name ${item.assignmentName}`);
+                }
+                item.assignment = assignments[0].id;
+            }
+        }
+    });
+}
+function reducePublish(courseId, srcDir, yamlDir, changelog) {
     return __awaiter(this, void 0, void 0, function* () {
         const ymlCfg = yield loadYaml(yamlDir);
-        const courseId = typeof course === 'string' ? course : course.id;
+        yield findNames(courseId, ymlCfg);
         for (const item of ymlCfg) {
             console.log(`publishing ${JSON.stringify(item)}`);
             const tmpDstDir = fs_1.default.mkdtempSync('/tmp/publish_codio_reduce');
             const paths = item.paths || [];
             paths.push(`!${yamlDir}`); // exclude yaml directory from export
             paths.push(`!${yamlDir}/**`); // exclude yaml directory from export
-            let assignmentId;
-            if (item.assignmentName && typeof course !== 'string') {
-                for (const module of course.modules) {
-                    for (const assignment of module.assignments) {
-                        if (assignment.name === item.assignmentName) {
-                            if (assignmentId) {
-                                throw new Error(`many assignments in course with same name ${item.assignmentName}`);
-                            }
-                            else {
-                                assignmentId = assignment.id;
-                            }
-                        }
-                    }
-                }
-            }
-            else {
-                assignmentId = item.assignment;
-            }
-            if (!assignmentId) {
+            if (!item.assignment) {
                 throw new Error(`assignment not found with name "${item.assignmentName}}"`);
             }
             yield tools_1.default.reduce(srcDir, tmpDstDir, item.section, paths);
-            yield assignment.publish(courseId, assignmentId, tmpDstDir, changelog);
+            yield assignment.publish(courseId, item.assignment, tmpDstDir, changelog);
             fs_1.default.rmdirSync(tmpDstDir, { recursive: true });
         }
     });
@@ -1632,13 +1636,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.updateAssignmentSettings = exports.exportAssessmentData = exports.exportAssignmentCSV = exports.exportStudentCSV = exports.downloadAssessmentData = exports.downloadAssignmentCSV = exports.downloadStudentCSV = exports.downloadStudentAssignment = exports.exportStudentAssignment = exports.waitDownloadTask = exports.assignmentStudentsProgress = exports.findByName = exports.info = void 0;
+exports.exportAssessmentData = exports.exportAssignmentCSV = exports.exportStudentCSV = exports.downloadAssessmentData = exports.downloadAssignmentCSV = exports.downloadStudentCSV = exports.downloadStudentAssignment = exports.exportStudentAssignment = exports.waitDownloadTask = exports.assignmentStudentsProgress = exports.findByName = exports.info = void 0;
 const bent_1 = __importDefault(__nccwpck_require__(5929));
 const https_1 = __importDefault(__nccwpck_require__(7211));
 const fs_1 = __importDefault(__nccwpck_require__(5747));
+const lodash_1 = __importDefault(__nccwpck_require__(4749));
 const config_1 = __importDefault(__nccwpck_require__(2602));
 const tools_1 = __nccwpck_require__(6729);
 const getJson = (0, bent_1.default)('json');
+function flattenAssignments(course) {
+    course.assignments = lodash_1.default.flatten(lodash_1.default.map(course.modules, 'assignments'));
+}
 function info(courseId) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!config_1.default) {
@@ -1649,7 +1657,9 @@ function info(courseId) {
             const authHeaders = {
                 'Authorization': `Bearer ${token}`
             };
-            return getJson(`${(0, tools_1.getApiV1Url)()}/courses/${courseId}`, undefined, authHeaders);
+            const course = yield getJson(`${(0, tools_1.getApiV1Url)()}/courses/${courseId}`, undefined, authHeaders);
+            flattenAssignments(course);
+            return course;
         }
         catch (error) {
             if (error.json) {
@@ -1676,7 +1686,9 @@ function findByName(courseName, withHiddenAssignments) {
                 withHiddenAssignments: withHiddenAssignments ? 'true' : 'false'
             };
             const urlParams = new URLSearchParams(params);
-            return getJson(`${(0, tools_1.getApiV1Url)()}/courses?${urlParams.toString()}`, undefined, authHeaders);
+            const course = yield getJson(`${(0, tools_1.getApiV1Url)()}/courses?${urlParams.toString()}`, undefined, authHeaders);
+            flattenAssignments(course);
+            return course;
         }
         catch (error) {
             if (error.json) {
@@ -1894,30 +1906,6 @@ function exportAssessmentData(courseId, assignmentIds) {
     });
 }
 exports.exportAssessmentData = exportAssessmentData;
-function updateAssignmentSettings(courseId, assignmentId, jsonFilePath) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (!config_1.default) {
-            throw new Error('No Config');
-        }
-        try {
-            const token = config_1.default.getToken();
-            const authHeaders = { 'Authorization': `Bearer ${token}` };
-            const jsonString = yield fs_1.default.promises.readFile(jsonFilePath, { encoding: 'utf8' });
-            const jsonParams = JSON.parse(jsonString);
-            const api = (0, bent_1.default)(`${(0, tools_1.getApiV1Url)()}`, 'POST', 'json', 200);
-            const result = yield api(`/courses/${courseId}/assignments/${assignmentId}/settings`, jsonParams, authHeaders);
-            console.log(result);
-        }
-        catch (error) {
-            if (error.json) {
-                const message = JSON.stringify(yield error.json());
-                throw new Error(message);
-            }
-            throw error;
-        }
-    });
-}
-exports.updateAssignmentSettings = updateAssignmentSettings;
 const course = {
     assignmentStudentsProgress,
     info,
@@ -1929,7 +1917,6 @@ const course = {
     downloadStudentCSV,
     downloadAssignmentCSV,
     downloadAssessmentData,
-    updateAssignmentSettings,
     findByName
 };
 exports.default = course;
@@ -50613,27 +50600,21 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
             codio_api_js_1.default.v1.setAuthToken(token);
         }
         let foundAssignment;
-        let courseInfo;
         if (courseName && !courseId) {
-            courseInfo = yield codio_api_js_1.default.v1.course.findByName(courseName, true);
+            const courseInfo = yield codio_api_js_1.default.v1.course.findByName(courseName, true);
             courseId = courseInfo.id;
             if (assignmentName && !assignmentId) {
-                for (const unit of courseInfo.modules) {
-                    for (const assignment of unit.assignments) {
-                        if (assignment.name === assignmentName) {
-                            if (!foundAssignment) {
-                                foundAssignment = assignment;
-                            }
-                            else {
-                                throw new Error(`many assignments with same name ${assignmentName}`);
-                            }
+                for (const assignment of courseInfo.assignments) {
+                    if (assignment.name === assignmentName) {
+                        if (!foundAssignment) {
+                            foundAssignment = assignment;
+                        }
+                        else {
+                            throw new Error(`many assignments with same name ${assignmentName}`);
                         }
                     }
                 }
             }
-        }
-        else {
-            courseInfo = yield codio_api_js_1.default.v1.course.info(courseId);
         }
         if (foundAssignment) {
             assignmentId = foundAssignment.id;
@@ -50646,7 +50627,7 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
         }
         else {
             if (yml) {
-                yield codio_api_js_1.default.v1.assignment.reducePublish(courseInfo || courseId, dir, yml, changelog);
+                yield codio_api_js_1.default.v1.assignment.reducePublish(courseId, dir, yml, changelog);
             }
             else {
                 if (!assignmentId) {
