@@ -212,9 +212,10 @@ chownr@^2.0.0:
   resolved "https://registry.yarnpkg.com/chownr/-/chownr-2.0.0.tgz#15bfbe53d2eab4cf70f18a8cd68ebe5b3cb1dece"
   integrity sha512-bIomtDF5KGpdogkLd9VspvFzk9KfpyyGlS8YFVZl7TGPBHL5snIOnxeshwVgPteQ9b4Eydl+pVbIyE1DcvCWgQ==
 
-codio-api-js@codio/codio-api-js#e57737fc2bd32a570520e80b821b562c3e8676cf:
+"codio-api-js@>=0.1.0 <1.0.0":
   version "0.7.0"
-  resolved "https://codeload.github.com/codio/codio-api-js/tar.gz/e57737fc2bd32a570520e80b821b562c3e8676cf"
+  resolved "https://registry.yarnpkg.com/codio-api-js/-/codio-api-js-0.7.0.tgz#c3003b423e82e3acd862fce6e8342e19c6c98cfd"
+  integrity sha512-rWf0AW7JgllJNr2zSJYNGGfnbi+87Y/Aymc9E9G5d8oE9TS0zIcelr9gBlmIr3nbOIszrqxi5bFJ3fKyF00bqA==
   dependencies:
     bent "^7.3.12"
     form-data "^4.0.0"
