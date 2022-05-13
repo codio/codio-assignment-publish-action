@@ -1344,6 +1344,10 @@ function publishArchive(courseId, assignmentId, archivePath, changelog) {
 function validityState(ymls) {
     const map = new Map();
     for (const yml of ymls) {
+        if (!yml.section) {
+            console.error(`Warning: ${yml.assignment || yml.assignmentName} is empty. skipped`);
+            continue;
+        }
         const section = lodash_1.default.isString(yml.section) ? [yml.section] : yml.section;
         const assignmentId = yml.assignment || yml.assignmentName;
         if (assignmentId === undefined) {
@@ -1446,7 +1450,7 @@ function reducePublish(courseId, srcDir, yamlDir, changelog) {
             if (!item.assignment) {
                 throw new Error(`assignment not found with name "${item.assignmentName}}"`);
             }
-            yield tools_1.default.reduce(srcDir, tmpDstDir, item.section, paths);
+            yield tools_1.default.reduce(srcDir, tmpDstDir, item.section, lodash_1.default.compact(paths));
             yield assignment.publish(courseId, item.assignment, tmpDstDir, changelog);
             fs_1.default.rmdirSync(tmpDstDir, { recursive: true });
         }
