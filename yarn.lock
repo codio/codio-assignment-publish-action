@@ -124,9 +124,9 @@
   integrity sha512-Klz949h02Gz2uZCMGwDUSDS1YBlTdDDgbWHi+81l29tQALUtvz4rAYi5uoVhE5Lagoq6DeqAUlbrHvW/mXDgdQ==
 
 "@types/node@*":
-  version "17.0.39"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-17.0.39.tgz#3652d82e2a16b4ea679d5ea3143b816c91b7e113"
-  integrity sha512-JDU3YLlnPK3WDao6/DlXLOgSNpG13ct+CwIO17V8q0/9fWJyeMJJ/VyZ1lv8kDprihvZMydzVwf0tQOqGiY2Nw==
+  version "17.0.42"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-17.0.42.tgz#d7e8f22700efc94d125103075c074396b5f41f9b"
+  integrity sha512-Q5BPGyGKcvQgAMbsr7qEGN/kIPN6zZecYYABeTDBizOsau+2NMdSVTar9UQw21A2+JyA2KRNDYaYrPB0Rpk2oQ==
 
 "@vercel/ncc@^0.26.1":
   version "0.26.2"
@@ -213,9 +213,9 @@ chownr@^2.0.0:
   integrity sha512-bIomtDF5KGpdogkLd9VspvFzk9KfpyyGlS8YFVZl7TGPBHL5snIOnxeshwVgPteQ9b4Eydl+pVbIyE1DcvCWgQ==
 
 "codio-api-js@>=0.1.0 <1.0.0":
-  version "0.8.2"
-  resolved "https://registry.yarnpkg.com/codio-api-js/-/codio-api-js-0.8.2.tgz#d844d7847ba4a770d366d2299fe1dcf740420665"
-  integrity sha512-qJojO+a+rW/i1a4x4fUkS7ngS8URHhoiInjujIy9cUMW0Io29PXuQBFcJIoHoOw9yNMpDPBbV1MwMqoGqX1OmQ==
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/codio-api-js/-/codio-api-js-0.9.0.tgz#61369d37c60e47b90a86b7253b3d9ddfa6b1c609"
+  integrity sha512-LVcBePfjxmbw+zh6yGKB3lY8H8px3Ok1NUx+4/sE0ITZL20Brm7EELf1ghGQePA9+8Yk7JI7sNkO9jOqg9xIDA==
   dependencies:
     bent "^7.3.12"
     form-data "^4.0.0"
@@ -589,7 +589,7 @@ simple-zstd@^1.3.1:
 slash@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/slash/-/slash-1.0.0.tgz#c41f2f6c39fc16d1cd17ad4b5d896114ae470d55"
-  integrity sha1-xB8vbDn8FtHNF61LXYlhFK5HDVU=
+  integrity sha512-3TYDR7xWt4dIqV2JauJr+EJeW356RXijHeUlO+8djJ+uBXPn8/2dpzBc8yQhh583sVvc9CvFAeQVgijsH+PNNg==
 
 stream-shift@^1.0.0:
   version "1.0.1"
@@ -625,7 +625,7 @@ tar@^6.1.0:
 tempfile@^1.1.0:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/tempfile/-/tempfile-1.1.1.tgz#5bcc4eaecc4ab2c707d8bc11d99ccc9a2cb287f2"
-  integrity sha1-W8xOrsxKsscH2LwR2ZzMmiyyh/I=
+  integrity sha512-NjT12fW6pSEKz1eVcADgaKfeM+XZ4+zSaqVz46XH7+CiEwcelnwtGWRRjF1p+xyW2PVgKKKS2UUw1LzRelntxg==
   dependencies:
     os-tmpdir "^1.0.0"
     uuid "^2.0.1"
@@ -663,12 +663,12 @@ universal-user-agent@^6.0.0:
 util-deprecate@^1.0.1, util-deprecate@~1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/util-deprecate/-/util-deprecate-1.0.2.tgz#450d4dc9fa70de732762fbd2d4a28981419a0ccf"
-  integrity sha1-RQ1Nyfpw3nMnYvvS1KKJgUGaDM8=
+  integrity sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==
 
 uuid@^2.0.1:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-2.0.3.tgz#67e2e863797215530dff318e5bf9dcebfd47b21a"
-  integrity sha1-Z+LoY3lyFVMN/zGOW/nc6/1Hsho=
+  integrity sha512-FULf7fayPdpASncVy4DLh3xydlXEJJpvIELjYjNeQWYUZ9pclcpvCZSr2gkmN2FrrGcI7G/cJsIEwk5/8vfXpg==
 
 uuid@^8.3.2:
   version "8.3.2"
@@ -678,7 +678,7 @@ uuid@^8.3.2:
 wrappy@1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/wrappy/-/wrappy-1.0.2.tgz#b5243d8f3ec1aa35f1364605bc0d1036e30ab69f"
-  integrity sha1-tSQ9jz7BqjXxNkYFvA0QNuMKtp8=
+  integrity sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==
 
 xtend@~4.0.1:
   version "4.0.2"

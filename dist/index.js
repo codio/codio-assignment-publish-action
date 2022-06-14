@@ -3188,6 +3188,9 @@ function loadYaml(yamlDir) {
         for (const file of files) {
             const ymlText = yield fs_1.default.promises.readFile(path_1.default.join(yamlDir, file), { encoding: 'utf-8' });
             let ymls = yaml_1.default.parse(ymlText);
+            if (!ymls) {
+                continue;
+            }
             if (!lodash_1.default.isArray(ymls)) {
                 ymls = [ymls];
             }
@@ -3974,21 +3977,34 @@ const config_2 = __importDefault(__nccwpck_require__(2602));
 const getJson = (0, bent_1.default)('json');
 function copyStripped(srcDir, bookStripped, metadataStriped, dstDir, paths) {
     return __awaiter(this, void 0, void 0, function* () {
-        paths.push('.guides/**');
-        paths.push('.codio');
-        paths.push('.codio-menu');
-        paths.push('.settings');
-        paths.push('!.github/**');
-        paths.push('!.guides/book.json');
-        paths.push('!.guides/metadata.json');
+        const stringPaths = lodash_1.default.filter(paths, _ => typeof _ === 'string');
+        const mapPaths = lodash_1.default.filter(paths, _ => typeof _ != 'string');
+        stringPaths.push('.guides/**');
+        stringPaths.push('.codio');
+        stringPaths.push('.codio-menu');
+        stringPaths.push('.settings');
+        stringPaths.push('!.github/**');
+        stringPaths.push('!.guides/book.json');
+        stringPaths.push('!.guides/metadata.json');
         for (const path of config_1.excludePaths) {
-            paths.push(`!${path}`);
+            stringPaths.push(`!${path}`);
         }
         yield (0, recursive_copy_1.default)(srcDir, dstDir, {
-            filter: paths,
+            filter: stringPaths,
             overwrite: true,
             dot: true
         });
+        for (const map of mapPaths) {
+            try {
+                yield (0, recursive_copy_1.default)(path_1.default.join(srcDir, map.source), path_1.default.join(dstDir, map.destination), {
+                    overwrite: true,
+                    dot: true
+                });
+            }
+            catch (_) {
+                console.error(_);
+            }
+        }
         const bookJsonPath = path_1.default.join(dstDir, '.guides', 'book.json');
         const metadataPath = path_1.default.join(dstDir, '.guides', 'metadata.json');
         yield fs_1.default.promises.mkdir(path_1.default.join(srcDir, '.guides'), { recursive: true });
