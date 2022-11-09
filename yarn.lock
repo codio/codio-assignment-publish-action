@@ -222,9 +222,9 @@ chownr@^2.0.0:
   resolved "https://registry.npmjs.org/chownr/-/chownr-2.0.0.tgz"
   integrity sha512-bIomtDF5KGpdogkLd9VspvFzk9KfpyyGlS8YFVZl7TGPBHL5snIOnxeshwVgPteQ9b4Eydl+pVbIyE1DcvCWgQ==
 
-"codio-api-js@https://github.com/codio/codio-api-js#f4e9677a2d75e06e08c8408edc1a93901f1e6a2e":
+"codio-api-js@https://github.com/codio/codio-api-js#e1066441f510e0395bc747c7da908c227a33a410":
   version "0.10.1"
-  resolved "https://github.com/codio/codio-api-js#f4e9677a2d75e06e08c8408edc1a93901f1e6a2e"
+  resolved "https://github.com/codio/codio-api-js#e1066441f510e0395bc747c7da908c227a33a410"
   dependencies:
     bent "^7.3.12"
     form-data "^4.0.0"

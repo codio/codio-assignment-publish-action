@@ -3539,9 +3539,7 @@ function reduce(srcDir, dstDir, yaml_sections, paths) {
         const contentDir = path_1.default.join(srcDir, GUIDES_CONTENT_DIR);
         const rootMetadataPath = path_1.default.join(contentDir, INDEX_METADATA_FILE);
         const rootMetadata = readMetadataFile(rootMetadataPath);
-        console.log("readMetadataFile", JSON.stringify(rootMetadata, undefined, " "));
         const guidesStructure = getGuidesStructure(rootMetadata, srcDir, '');
-        console.log("getGuidesStructure", JSON.stringify(guidesStructure, undefined, " "));
         const strippedStructure = stripStructure(guidesStructure, yaml_sections);
         const strippedSectionsIds = getStrippedSectionIds(strippedStructure);
         const excludePaths = getExcludedPaths(guidesStructure, strippedSectionsIds);
@@ -3587,8 +3585,6 @@ function readMetadataFile(path) {
 }
 exports.readMetadataFile = readMetadataFile;
 function stripStructure(guidesStructure, yaml_sections) {
-    console.log('strip structure', JSON.stringify(guidesStructure, undefined, " "));
-    console.log('yaml sections', yaml_sections);
     const result = [];
     const structure = lodash_1.default.cloneDeep(guidesStructure);
     for (const item of yaml_sections) {
