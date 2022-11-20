@@ -32,6 +32,29 @@ exports.default = {
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -52,7 +75,7 @@ const path_1 = __importDefault(__nccwpck_require__(5622));
 const config_1 = __importDefault(__nccwpck_require__(5162));
 const assessmentsTypes_1 = __nccwpck_require__(3860);
 const form_data_1 = __importDefault(__nccwpck_require__(8959));
-const tools_1 = __importDefault(__nccwpck_require__(6660));
+const tools_1 = __importStar(__nccwpck_require__(6660));
 const lodash_1 = __importDefault(__nccwpck_require__(669));
 const glob_promise_1 = __importDefault(__nccwpck_require__(8952));
 const getJson = (0, bent_1.default)('json');
@@ -268,6 +291,7 @@ function getMetadataPages(dir, guidesStructure) {
 }
 function fromCodioProject(libraryId, path) {
     return __awaiter(this, void 0, void 0, function* () {
+        yield (0, tools_1.fixGuidesVersion)(path);
         libraryId = yield getLibraryId(libraryId);
         const assessments = yield loadProjectAssessments(path);
         for (const _ of assessments) {
@@ -1782,7 +1806,7 @@ const PAGE = 'page';
 function fixGuidesVersion(projectPath) {
     return __awaiter(this, void 0, void 0, function* () {
         if (fs_1.default.existsSync(path_1.default.join(projectPath, OLD_METADATA_FILE))) {
-            yield convertToGuidesV3();
+            yield convertToGuidesV3(projectPath);
         }
     });
 }
@@ -2015,14 +2039,14 @@ function secondsToDate(seconds) {
     return t;
 }
 exports.secondsToDate = secondsToDate;
-function convertToGuidesV3() {
+function convertToGuidesV3(cwd) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log('guides conversion process...');
         try {
-            yield execShellCommand(`curl "https://static-assets.codio.com/guides-converter-v3/guides-converter-v3-${CONVERTER_VERSION}" --output guides-converter-v3`);
-            yield execShellCommand('chmod +x ./guides-converter-v3');
-            yield execShellCommand('./guides-converter-v3');
-            yield execShellCommand('rm guides-converter-v3');
+            yield execShellCommand(`curl "https://static-assets.codio.com/guides-converter-v3/guides-converter-v3-${CONVERTER_VERSION}" --output guides-converter-v3`, cwd);
+            yield execShellCommand('chmod +x ./guides-converter-v3', cwd);
+            yield execShellCommand('./guides-converter-v3', cwd);
+            yield execShellCommand('rm guides-converter-v3', cwd);
         }
         catch (error) {
             throw new Error(error);
@@ -2030,9 +2054,9 @@ function convertToGuidesV3() {
     });
 }
 exports.convertToGuidesV3 = convertToGuidesV3;
-function execShellCommand(command) {
+function execShellCommand(command, cwd) {
     return new Promise((resolve, reject) => {
-        child_process_1.default.exec(command, (error, stdout, stderr) => {
+        child_process_1.default.exec(command, { cwd }, (error, stdout, stderr) => {
             if (error) {
                 reject(error);
             }
