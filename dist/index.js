@@ -80,6 +80,7 @@ const lodash_1 = __importDefault(__nccwpck_require__(669));
 const glob_promise_1 = __importDefault(__nccwpck_require__(8952));
 const getJson = (0, bent_1.default)('json');
 const ASSESSMENTS_DIR = '.guides/assessments';
+const ROOT_METADATA = '.guides/content/index.json';
 function listLibraries() {
     return __awaiter(this, void 0, void 0, function* () {
         if (!config_1.default) {
@@ -252,12 +253,12 @@ function loadProjectAssessments(dir) {
         const assessmentJsonFiles = yield (0, glob_promise_1.default)('*.json', { cwd: path_1.default.join(dir, ASSESSMENTS_DIR), nodir: true });
         let assessments = [];
         for (const file of assessmentJsonFiles) {
-            const filePath = path_1.default.join(ASSESSMENTS_DIR, file);
+            const filePath = path_1.default.join(dir, ASSESSMENTS_DIR, file);
             const assessmentString = yield fs_1.default.promises.readFile(filePath, { encoding: 'utf8' });
             const assessment = JSON.parse(assessmentString);
             assessments = assessments.concat(assessment);
         }
-        const rootMetadata = tools_1.default.readMetadataFile('.guides/content/index.json');
+        const rootMetadata = tools_1.default.readMetadataFile(path_1.default.join(dir, ROOT_METADATA));
         const guidesStructure = tools_1.default.getGuidesStructure(rootMetadata, dir, '');
         const metadataPages = getMetadataPages(dir, guidesStructure);
         for (const json of assessments) {
@@ -973,7 +974,7 @@ function validateYmlCfg(ymls) {
         const section = yml.section || [];
         const assignmentId = yml.assignment;
         if (assignmentId === undefined) {
-            throw new Error('assignment does not exist');
+            // throw new Error('assignment does not exist')
         }
         if (map.has(assignmentId)) {
             const item = map.get(assignmentId);
@@ -1036,7 +1037,7 @@ function findNames(courseId, ymlCfg) {
 function reducePublish(courseId, srcDir, yamlDir, changelogOrOptions) {
     return __awaiter(this, void 0, void 0, function* () {
         let ymlCfg = yield loadYaml(yamlDir);
-        yield findNames(courseId, ymlCfg);
+        // await findNames(courseId, ymlCfg)
         ymlCfg = validateYmlCfg(ymlCfg);
         for (const item of ymlCfg) {
             console.log(`publishing ${JSON.stringify(item)}`);
@@ -1045,10 +1046,10 @@ function reducePublish(courseId, srcDir, yamlDir, changelogOrOptions) {
             paths.push(`!${yamlDir}`); // exclude yaml directory from export
             paths.push(`!${yamlDir}/**`); // exclude yaml directory from export
             if (!item.assignment) {
-                throw new Error(`assignment not found with name "${item.assignmentName}}"`);
+                throw new Error(`assignment not found with name "${item.assignmentName}"`);
             }
             yield tools_1.default.reduce(srcDir, tmpDstDir, item.section, lodash_1.default.compact(paths));
-            yield assignment.publish(courseId, item.assignment, tmpDstDir, changelogOrOptions);
+            //    await assignment.publish(courseId, item.assignment, tmpDstDir, changelogOrOptions)
             fs_1.default.rmdirSync(tmpDstDir, { recursive: true });
         }
     });
