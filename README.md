@@ -1,6 +1,6 @@
-# Codio assessment publish action
+# Codio assignment publish action
 
-Publishes assessment
+Publishes assignment
 
 # Usage
 
