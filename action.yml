@@ -38,5 +38,5 @@ inputs:
     description: 'API Domain'
     default: 'codio.com'
 runs:
-  using: 'node20'
+  using: 'node24'
   main: 'dist/index.js'
